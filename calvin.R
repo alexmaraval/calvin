@@ -21,8 +21,9 @@ F = function(N,c)
 #############################################        Dynamic Programming Approach        #######################################
 ################################################################################################################################
 # dictionnary used as the memoizing data structure (a matrix)
-d <<- data.frame(matrix(c(NA,NA),nrow = 1))
-colnames(d) = c("id","val")
+d <- new.env()
+d$id <- NULL
+d$val <- NULL
 
 # Optimal time recurring function
 F = function(N,c,d)
@@ -31,6 +32,7 @@ F = function(N,c,d)
   if(N == 0 || c >= N) return(0)
   if(c == 0) return(N*20)
   
+  # check if terms we need are in the dictionary already
   if(paste0(N-1,'-',c-1) %in% d$id){
     part1 = as.numeric(d$val[which(d$id == paste0(N-1,'-',c-1))])
   } else {part1 = F(N - 1, c - 1, d)}
@@ -38,49 +40,23 @@ F = function(N,c,d)
   if(paste0(N-1,'-',c) %in% d$id){
     part2 = as.numeric(d$val[which(d$id == paste0(N-1,'-',c))])
   } else {part2 = F(N - 1, c, d)}
-
-  obj = function(x) 
-  {
-    (0.5 - x/160)*part1 + x^2/320 + (0.5 + x/160)*part2
-  }
+  
+  # objective function we want to minimise
+  obj = function(x) { (0.5 - x/160)*part1 + x^2/320 + (0.5 + x/160)*part2 }
+  
+  # minimisation (assume it will always be a convex problem witha unique minimum)
   res = optimize(obj, c(0,80))
   print(paste('For',N,'signals and',c,'charges, Calvin decides at level',res$minimum,'and waits',res$objective))
-  if(!(paste0(N,'-',c) %in% d$id)) {d <<- rbind(d, c(paste0(N,'-',c),res$objective))}
+  
+  # add the term in the dictionary if not already in it (only useful when calling F with the same parameters in fact)
+  if(!(paste0(N,'-',c) %in% d$id)) 
+  {
+    d$id <- c(d$id, paste0(N,'-',c))
+    d$val <- c(d$val,res$objective)
+  }
+  
   return(res$objective)
 }
-F(0,0,d)
-d
-F(1,0,d)
-d
-F(1,1,d)
-d
-F(2,0,d)
-d
-F(2,1,d)
-d
-F(2,2,d)
-d
-F(3,0,d)
-d
-F(3,1,d)
-d
-F(3,2,d)
-d
-F(3,3,d)
-d
-F(4,0,d)
-d
-F(4,1,d)
-d
-F(4,2,d)
-d
-F(4,3,d)
-d
-F(4,4,d)
-d
-F(5,3,d)
-d
-F(6,4,d)
-d
-F(10,5,d)
-d
+
+F(100,50,d)
+dmat <- matrix(c(d$id,as.numeric(d$val)),ncol = 2)
