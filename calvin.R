@@ -16,6 +16,7 @@ F = function(N,c)
   print(paste('For',N,'signals and',c,'charges, Calvin decides at level',res$minimum,'and waits',res$objective))
   return(res$objective)
 }
+F(20,10)
 
 ################################################################################################################################
 #############################################        Dynamic Programming Approach        #######################################
@@ -57,6 +58,6 @@ F = function(N,c,d)
   
   return(res$objective)
 }
-
+F(20,10,d)
 F(100,50,d)
 dmat <- matrix(c(d$id,as.numeric(d$val)),ncol = 2)
